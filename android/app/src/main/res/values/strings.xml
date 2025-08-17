@@ -1,4 +1,0 @@
-<resources>
-    <string name="app_name">Ask Why</string>
-</resources>    <s
-tring name="accessibility_service_description">专注应用启动器需要此权限来监控应用启动并显示目的输入界面</string>
