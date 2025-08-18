@@ -6,7 +6,11 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "types": [
+      "@types/react-native",
+      "expo-router/types"
+    ]
   },
   "include": [
     "**/*.ts",
