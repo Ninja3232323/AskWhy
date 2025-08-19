@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'; // 导入 AsyncStorage
 import { useEffect, useState } from 'react'; // 添加 React Hooks
-import { Alert, Button, Image, SectionList, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 class UsingInfoItem {
   private appIconPath: string;
@@ -158,71 +158,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 操作按钮 */}
-      <View style={styles.buttonsContainer}>
-        <Button title="添加新项目" onPress={addNewItem} />
-        <Button title="清除所有数据" onPress={clearAllData} color="red" />
-      </View>
-
-      <SectionList
-        style={styles.usingInfoSectionList}
-        sections={data}
-        keyExtractor={(item, index) => item.getAppName() + index}
-        showsVerticalScrollIndicator={false}
-
-        ListHeaderComponent={() => (
-          <View style={styles.header}>
-            <Text style={styles.headerText}>今日已记录:{"\n"}{recordCount}次</Text>
-          </View>
-        )}
-
-        renderItem={({item, index, section}) => {
-          const isFirst = index === 0;
-          const isLast = index === (section.data.length - 1);
-
-          return (
-            <View style={{
-              width: "100%",
-              height: "auto",
-              overflow: "hidden",
-              borderTopStartRadius: isFirst ? 8 : 0,
-              borderTopEndRadius: isFirst ? 8 : 0,
-              borderBottomStartRadius: isLast ? 8 : 0,
-              borderBottomEndRadius: isLast ? 8 : 0,
-            }}>
-              <View style={styles.usingInfoItem}>
-                <Image
-                  source={require("@/assets/images/icon.png")}
-                  style={styles.usingInfoItemIcon} />
-                <Text style={styles.usingInfoItemAppName}>{item.getAppName()}</Text>
-                <Text style={styles.usingInfoItemPurpose}>{item.getPurpose()}</Text>
-                <Button 
-                  title="编辑" 
-                  onPress={() => updateItem(
-                    data.findIndex(sec => sec.title === section.title),
-                    index,
-                    "修改后的用途"
-                  )} 
-                />
-              </View>
-            </View>
-          )
-        }}
-
-        renderSectionHeader={({section}) => {
-          return (
-            <View style={styles.usingInfoSectionListHeader}>
-              <Text style={styles.usingInfoSectionListHeaderTitle}>{section.title}</Text>
-            </View>
-          )
-        }}
-        
-        ListEmptyComponent={() => (
-          <View style={styles.emptyState}>
-            <Text>暂无数据，点击"添加新项目"开始记录</Text>
-          </View>
-        )}
-      />
+      <Text style={styles.title}> Home </Text> 
     </View>
   );
 }
@@ -230,87 +166,25 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
-    height: '100%',
-    width: '100%',
-    alignItems: "center",
-    backgroundColor: '#fff',
-    padding: 10,
-    gap: 10,
-  },
-
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 10,
-  },
-
-  header: {
-    backgroundColor: "#EEEEEE",
-    width: "100%",
-    height: 140,
-    borderRadius: 10
-  },
-
-  headerText: {
-    width: "auto",
-    height: "auto",
-    margin: 20,
-    fontSize: 25,
-    fontWeight: "bold"
-  },
-  
-  usingInfoSectionList: {
-    width: "95%",
-    height: "auto",
-  },
-  
-  usingInfoSectionListHeader: {
-    width: "100%",
-    height: 20,
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center"
-  },
-
-  usingInfoSectionListHeaderTitle: {
-    fontSize: 10
-  },
-
-  usingInfoItem: {
-    width: "100%",
-    height: 70, // 增加高度以容纳按钮
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#EEEEEE",
-    paddingHorizontal: 10,
-  },
-
-  usingInfoItemIcon: {
-    width: "auto",
-    height: "70%",
-    aspectRatio: 1,
-    resizeMode: "cover",
-    marginStart: 10
-  },
-
-  usingInfoItemAppName: {
-    fontSize: 16,
-    marginLeft: 10,
-    flex: 1,
-  },
-
-  usingInfoItemPurpose: {
-    fontSize: 10,
-    marginHorizontal: 10,
-    flex: 1,
-  },
-
-  emptyState: {
     padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 20,
+    color: '#666',
+    marginBottom: 10,
+    fontStyle: 'italic',
+  },
+  bodyText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#444',
   },
 });
