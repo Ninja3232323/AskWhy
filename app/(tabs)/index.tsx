@@ -1,16 +1,29 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'; // 导入 AsyncStorage
-import { useEffect, useState } from 'react'; // 添加 React Hooks
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import {
+  BodyText,
+  Caption,
+  Card,
+  Container,
+  DangerButton,
+  Header,
+  ListItem,
+  ModalContainer,
+  ModalContent,
+  PrimaryButton,
+  Subtitle,
+  Title
+} from '@/components/StyledComponents';
+import { useTheme } from '@/components/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+import { Alert, FlatList, Image, Modal, SectionList } from 'react-native';
 
-class UsingInfoItem {
+class AppInfoItem {
   private appIconPath: string;
   private appName: string;
-  private purpose: string;
 
-  constructor(appIconPath: string, appName: string, purpose: string) {
+  constructor(appIconPath: string, appName: string) {
     this.appIconPath = appIconPath;
     this.appName = appName;
-    this.purpose = purpose;
   }
 
   public getAppIconPath(): string {
@@ -21,67 +34,58 @@ class UsingInfoItem {
     return this.appName;
   }
 
-  public getPurpose(): string {
-    return this.purpose;
-  }
-
-  // 添加 toJSON 方法以便序列化
   toJSON() {
     return {
       appIconPath: this.appIconPath,
       appName: this.appName,
-      purpose: this.purpose
     };
   }
 
-  // 添加静态方法从对象创建实例
-  static fromObject(obj: any): UsingInfoItem {
-    return new UsingInfoItem(obj.appIconPath, obj.appName, obj.purpose);
+  static fromObject(obj: any): AppInfoItem {
+    return new AppInfoItem(obj.appIconPath, obj.appName);
   }
 }
 
-// 存储键常量
 const STORAGE_KEYS = {
   USING_INFO_DATA: 'using-info-data',
   RECORD_COUNT: 'record-count'
 };
 
+const AVAILABLE_APPS = [
+  { id: '1', name: '微信', icon: require('@/assets/images/icon.png') },
+  { id: '2', name: '支付宝', icon: require('@/assets/images/icon.png') },
+  { id: '3', name: '抖音', icon: require('@/assets/images/icon.png') },
+  { id: '4', name: '淘宝', icon: require('@/assets/images/icon.png') },
+  { id: '5', name: '京东', icon: require('@/assets/images/icon.png') },
+  { id: '6', name: '美团', icon: require('@/assets/images/icon.png') },
+  { id: '7', name: '百度地图', icon: require('@/assets/images/icon.png') },
+  { id: '8', name: '高德地图', icon: require('@/assets/images/icon.png') },
+  { id: '9', name: '网易云音乐', icon: require('@/assets/images/icon.png') },
+  { id: '10', name: 'QQ音乐', icon: require('@/assets/images/icon.png') },
+];
+
 export default function HomeScreen() {
   const [data, setData] = useState<any[]>([]);
   const [recordCount, setRecordCount] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
+  const { colors, isDark, toggleTheme } = useTheme();
 
-  // 加载保存的数据
   useEffect(() => {
     loadSavedData();
   }, []);
 
-  // 从 AsyncStorage 加载数据
   const loadSavedData = async () => {
     try {
-      // 加载使用信息数据
       const savedData = await AsyncStorage.getItem(STORAGE_KEYS.USING_INFO_DATA);
       if (savedData !== null) {
         const parsedData = JSON.parse(savedData);
-        // 将普通对象转换回 UsingInfoItem 实例
         const transformedData = parsedData.map((section: any) => ({
           ...section,
-          data: section.data.map((item: any) => UsingInfoItem.fromObject(item))
+          data: section.data.map((item: any) => AppInfoItem.fromObject(item))
         }));
         setData(transformedData);
-      } else {
-        // 如果没有保存的数据，使用默认数据
-        setData([
-          {
-            title: "A",
-            data: [
-              new UsingInfoItem("./assets/images/icon.png", "AAA", "Fucking"),
-              new UsingInfoItem("./assets/images/icon.png", "BBB", "Sucking"),
-            ]
-          }
-        ]);
       }
 
-      // 加载记录次数
       const savedCount = await AsyncStorage.getItem(STORAGE_KEYS.RECORD_COUNT);
       if (savedCount !== null) {
         setRecordCount(parseInt(savedCount));
@@ -92,31 +96,20 @@ export default function HomeScreen() {
     }
   };
 
-  // 保存数据到 AsyncStorage
   const saveData = async (newData: any[], newCount: number) => {
     try {
-      // 保存使用信息数据
       await AsyncStorage.setItem(STORAGE_KEYS.USING_INFO_DATA, JSON.stringify(newData));
-      
-      // 保存记录次数
       await AsyncStorage.setItem(STORAGE_KEYS.RECORD_COUNT, newCount.toString());
-      
       setData(newData);
       setRecordCount(newCount);
-      Alert.alert('成功', '数据已保存');
     } catch (error) {
       console.error('保存数据失败:', error);
       Alert.alert('错误', '保存数据失败');
     }
   };
 
-  // 添加新数据项
-  const addNewItem = () => {
-    const newItem = new UsingInfoItem(
-      "./assets/images/icon.png", 
-      `App ${data[0]?.data.length + 1 || 1}`, 
-      "New Purpose"
-    );
+  const addNewItem = (app: any) => {
+    const newItem = new AppInfoItem("./assets/images/icon.png", app.name);
     
     const newData = [...data];
     if (newData.length > 0) {
@@ -129,62 +122,112 @@ export default function HomeScreen() {
     }
     
     saveData(newData, recordCount + 1);
+    setModalVisible(false);
+    Alert.alert('成功', '应用已添加');
   };
 
-  // 清除所有数据
   const clearAllData = async () => {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.USING_INFO_DATA);
       await AsyncStorage.removeItem(STORAGE_KEYS.RECORD_COUNT);
       setData([]);
       setRecordCount(0);
-      Alert.alert('成功', '所有数据已清除');
+      Alert.alert('成功', '所有应用已清除');
     } catch (error) {
       console.error('清除数据失败:', error);
-      Alert.alert('错误', '清除数据失败');
+      Alert.alert('错误', '清除应用失败');
     }
   };
 
-  // 更新特定项目
-  const updateItem = (sectionIndex: number, itemIndex: number, newPurpose: string) => {
-    const newData = [...data];
-    newData[sectionIndex].data[itemIndex] = new UsingInfoItem(
-      newData[sectionIndex].data[itemIndex].getAppIconPath(),
-      newData[sectionIndex].data[itemIndex].getAppName(),
-      newPurpose
-    );
-    saveData(newData, recordCount);
-  };
+  const renderAppItem = ({ item }: { item: any }) => (
+    <ListItem 
+      onPress={() => addNewItem(item)}
+      style={{ borderRadius: 8, marginVertical: 4 }}
+    >
+      <Image source={item.icon} style={{ width: 40, height: 40, borderRadius: 8, marginRight: 12 }} />
+      <BodyText>{item.name}</BodyText>
+    </ListItem>
+  );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}> Home </Text> 
-    </View>
+    <Container>
+
+      {/* 操作按钮 */}
+      <Card style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+        <PrimaryButton onPress={() => setModalVisible(true)}>
+          <BodyText style={{ color: '#fff' }}>添加新应用</BodyText>
+        </PrimaryButton>
+        <DangerButton onPress={clearAllData}>
+          <BodyText style={{ color: '#fff' }}>清除所有数据</BodyText>
+        </DangerButton>
+      </Card>
+
+      <SectionList
+        sections={data}
+        keyExtractor={(item, index) => item.getAppName() + index}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={() => (
+          <Header>
+            <Title>已添加的应用</Title>
+            <Subtitle style={{ color: '#fff' }}>{recordCount}个</Subtitle>
+          </Header>
+        )}
+        renderItem={({item, index, section}) => {
+          const isFirst = index === 0;
+          const isLast = index === (section.data.length - 1);
+
+          return (
+            <Card style={{ 
+              marginVertical: 4,
+              borderTopStartRadius: isFirst ? 12 : 4,
+              borderTopEndRadius: isFirst ? 12 : 4,
+              borderBottomStartRadius: isLast ? 12 : 4,
+              borderBottomEndRadius: isLast ? 12 : 4,
+            }}>
+              <ListItem style={{ borderRadius: 8 }}>
+                <Image
+                  source={require("@/assets/images/icon.png")}
+                  style={{ width: 40, height: 40, borderRadius: 8, marginRight: 12 }} />
+                <BodyText>{item.getAppName()}</BodyText>
+              </ListItem>
+            </Card>
+          )
+        }}
+        renderSectionHeader={({section}) => (
+          <Card style={{ marginTop: 16, padding: 8 }}>
+            <Caption>{section.title}</Caption>
+          </Card>
+        )}
+        ListEmptyComponent={() => (
+          <Card style={{ alignItems: 'center', padding: 20 }}>
+            <BodyText>暂无数据，点击"添加新应用"开始记录</BodyText>
+          </Card>
+        )}
+      />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <ModalContainer>
+          <ModalContent>
+            <Title style={{ textAlign: 'center' }}>选择要添加的应用</Title>
+            
+            <FlatList
+              data={AVAILABLE_APPS}
+              renderItem={renderAppItem}
+              keyExtractor={item => item.id}
+              style={{ maxHeight: 400, marginVertical: 16 }}
+            />
+            
+            <PrimaryButton onPress={() => setModalVisible(false)}>
+              <BodyText style={{ color: '#fff' }}>取消</BodyText>
+            </PrimaryButton>
+          </ModalContent>
+        </ModalContainer>
+      </Modal>
+    </Container>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 20,
-    color: '#666',
-    marginBottom: 10,
-    fontStyle: 'italic',
-  },
-  bodyText: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#444',
-  },
-});
