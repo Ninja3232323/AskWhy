@@ -1,3 +1,4 @@
+import { AppInfoItem } from '@/app/global';
 import {
   BodyText,
   Caption,
@@ -8,43 +9,14 @@ import {
   ListItem,
   ModalContainer,
   ModalContent,
-  PrimaryButton,
-  Subtitle,
+  NormalButton,
   Title
 } from '@/components/StyledComponents';
 import { useTheme } from '@/components/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, Image, Modal, SectionList } from 'react-native';
-
-class AppInfoItem {
-  private appIconPath: string;
-  private appName: string;
-
-  constructor(appIconPath: string, appName: string) {
-    this.appIconPath = appIconPath;
-    this.appName = appName;
-  }
-
-  public getAppIconPath(): string {
-    return this.appIconPath;
-  }
-
-  public getAppName(): string {
-    return this.appName;
-  }
-
-  toJSON() {
-    return {
-      appIconPath: this.appIconPath,
-      appName: this.appName,
-    };
-  }
-
-  static fromObject(obj: any): AppInfoItem {
-    return new AppInfoItem(obj.appIconPath, obj.appName);
-  }
-}
+import { Alert, FlatList, Image, Modal, SectionList, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const STORAGE_KEYS = {
   USING_INFO_DATA: 'using-info-data',
@@ -69,6 +41,7 @@ export default function HomeScreen() {
   const [recordCount, setRecordCount] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const { colors, isDark, toggleTheme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     loadSavedData();
@@ -110,7 +83,7 @@ export default function HomeScreen() {
 
   const addNewItem = (app: any) => {
     const newItem = new AppInfoItem("./assets/images/icon.png", app.name);
-    
+
     const newData = [...data];
     if (newData.length > 0) {
       newData[0].data.push(newItem);
@@ -120,7 +93,7 @@ export default function HomeScreen() {
         data: [newItem]
       });
     }
-    
+
     saveData(newData, recordCount + 1);
     setModalVisible(false);
     Alert.alert('成功', '应用已添加');
@@ -139,95 +112,142 @@ export default function HomeScreen() {
     }
   };
 
-  const renderAppItem = ({ item }: { item: any }) => (
-    <ListItem 
-      onPress={() => addNewItem(item)}
-      style={{ borderRadius: 8, marginVertical: 4 }}
-    >
-      <Image source={item.icon} style={{ width: 40, height: 40, borderRadius: 8, marginRight: 12 }} />
-      <BodyText>{item.name}</BodyText>
-    </ListItem>
-  );
-
   return (
-    <Container>
+    <>
+      <View style={{
+        backgroundColor: "#FFFFFF",
+        height: insets.top
+      }} />
+      <View style={{
+        width: "100%",
+        height: 70,
+        backgroundColor: "#FFFFFF",
+        flexDirection: "row",
+        alignItems: "center",
+        //justifyContent: "space-between",
+        justifyContent: "center",
+        paddingHorizontal: 10
+      }}>
+        <Text style={{
+          fontSize: 20
+        }}>首页</Text>
+      </View>
+      <Container>
+        <SectionList
+          sections={data}
+          keyExtractor={(item, index) => item.getAppName() + index}
+          showsVerticalScrollIndicator={false}
 
-      {/* 操作按钮 */}
-      <Card style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-        <PrimaryButton onPress={() => setModalVisible(true)}>
-          <BodyText style={{ color: '#fff' }}>添加新应用</BodyText>
-        </PrimaryButton>
-        <DangerButton onPress={clearAllData}>
-          <BodyText style={{ color: '#fff' }}>清除所有数据</BodyText>
-        </DangerButton>
-      </Card>
+          style={{
+            padding: 2
+          }}
 
-      <SectionList
-        sections={data}
-        keyExtractor={(item, index) => item.getAppName() + index}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={() => (
-          <Header>
-            <Title>已添加的应用</Title>
-            <Subtitle style={{ color: '#fff' }}>{recordCount}个</Subtitle>
-          </Header>
-        )}
-        renderItem={({item, index, section}) => {
-          const isFirst = index === 0;
-          const isLast = index === (section.data.length - 1);
+          ListHeaderComponent={() => (
+            <Header>
+              <Text style={{
+                fontSize: 24,
+                fontWeight: "bold",
+                color: useTheme().colors.text
+              }}>已添加的应用</Text>
+              <Text style={{
+                fontSize: 36,
+                fontWeight: "bold",
+                color: "#FFFFFF"
+              }}>{recordCount}个</Text>
+              <View style={{
+                marginTop: 5,
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between"
+              }}>
+                <NormalButton onPress={() => setModalVisible(true)}
+                  style={{
+                    width: "45%",
+                    backgroundColor: useTheme().colors.secondary
+                  }}>
+                  <BodyText numberOfLines={1} adjustsFontSizeToFit>添加新的应用</BodyText>
+                </NormalButton>
+                <DangerButton onPress={clearAllData}
+                  style={{
+                    width: "45%"
+                  }}>
+                  <BodyText numberOfLines={1} style={{ color: '#fff' }} adjustsFontSizeToFit>清除所有数据</BodyText>
+                </DangerButton>
+              </View>
+            </Header>
+          )}
+          renderItem={({ item, index, section }) => {
+            const isFirst = index === 0;
+            const isLast = index === (section.data.length - 1);
 
-          return (
-            <Card style={{ 
-              marginVertical: 4,
-              borderTopStartRadius: isFirst ? 12 : 4,
-              borderTopEndRadius: isFirst ? 12 : 4,
-              borderBottomStartRadius: isLast ? 12 : 4,
-              borderBottomEndRadius: isLast ? 12 : 4,
-            }}>
-              <ListItem style={{ borderRadius: 8 }}>
+            return (
+              <Card style={{
+                marginVertical: 0,
+                borderWidth: 0,
+                borderTopStartRadius: isFirst ? 12 : 0,
+                borderTopEndRadius: isFirst ? 12 : 0,
+                borderBottomStartRadius: isLast ? 12 : 0,
+                borderBottomEndRadius: isLast ? 12 : 0,
+                flexDirection: "row",
+                alignItems: "center",
+              }}>
                 <Image
                   source={require("@/assets/images/icon.png")}
                   style={{ width: 40, height: 40, borderRadius: 8, marginRight: 12 }} />
                 <BodyText>{item.getAppName()}</BodyText>
-              </ListItem>
-            </Card>
-          )
-        }}
-        renderSectionHeader={({section}) => (
-          <Card style={{ marginTop: 16, padding: 8 }}>
+              </Card>
+            )
+          }}
+          renderSectionHeader={({ section }) => (
             <Caption>{section.title}</Caption>
-          </Card>
-        )}
-        ListEmptyComponent={() => (
-          <Card style={{ alignItems: 'center', padding: 20 }}>
-            <BodyText>暂无数据，点击"添加新应用"开始记录</BodyText>
-          </Card>
-        )}
-      />
+          )}
+          ListEmptyComponent={() => (
+            <Card style={{
+              alignItems: 'center',
+            }}>
+              <BodyText>暂无数据，点击"添加新应用"开始记录</BodyText>
+            </Card>
+          )}
+        />
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <ModalContainer>
-          <ModalContent>
-            <Title style={{ textAlign: 'center' }}>选择要添加的应用</Title>
-            
-            <FlatList
-              data={AVAILABLE_APPS}
-              renderItem={renderAppItem}
-              keyExtractor={item => item.id}
-              style={{ maxHeight: 400, marginVertical: 16 }}
-            />
-            
-            <PrimaryButton onPress={() => setModalVisible(false)}>
-              <BodyText style={{ color: '#fff' }}>取消</BodyText>
-            </PrimaryButton>
-          </ModalContent>
-        </ModalContainer>
-      </Modal>
-    </Container>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <ModalContainer>
+            <ModalContent>
+              <Title style={{ textAlign: 'center' }}>选择要添加的应用</Title>
+
+              <FlatList
+                data={AVAILABLE_APPS}
+                renderItem={({ item }: { item: any }) => (
+                  <ListItem
+                    onPress={() => addNewItem(item)}
+                    style={{ borderRadius: 8, marginVertical: 4 }}
+                  >
+                    <Image source={item.icon} style={{ width: 40, height: 40, borderRadius: 8, marginRight: 12 }} />
+                    <BodyText>{item.name}</BodyText>
+                  </ListItem>
+                )}
+                keyExtractor={item => item.id}
+                style={{ maxHeight: 400, marginVertical: 16 }}
+              />
+
+              <NormalButton
+                onPress={() => setModalVisible(false)}
+                style={{
+                  backgroundColor: useTheme().colors.secondary
+                }}>
+                <BodyText style={{ color: '#fff' }}>取消</BodyText>
+              </NormalButton>
+            </ModalContent>
+          </ModalContainer>
+        </Modal>
+      </Container>
+    </>
+
   );
 }

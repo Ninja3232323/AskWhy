@@ -10,37 +10,23 @@ export const Container = styled.View`
 
 // 卡片组件
 export const Card = styled.View`
-  background-color: ${() => useTheme().colors.cardBackground};
   border-radius: 12px;
   padding: 16px;
   margin-vertical: 8px;
-  elevation: 2;
-  shadow-color: #000;
-  shadow-offset: 0px 2px;
-  shadow-opacity: 0.1;
-  shadow-radius: 3px;
+  backgroundColor: #FFFFFF;
+  elevation: 2
 `;
 
 // 按钮组件
-export const PrimaryButton = styled.TouchableOpacity`
-  background-color: ${() => useTheme().colors.primary};
-  padding: 12px 20px;
+export const NormalButton = styled.TouchableOpacity`
+  padding: 12px;
   border-radius: 8px;
   align-items: center;
-  margin: 8px;
-`;
-
-export const SecondaryButton = styled.TouchableOpacity`
-  background-color: ${() => useTheme().colors.secondary};
-  padding: 12px 20px;
-  border-radius: 8px;
-  align-items: center;
-  margin: 8px;
 `;
 
 export const DangerButton = styled.TouchableOpacity`
   background-color: ${() => useTheme().colors.danger};
-  padding: 12px 20px;
+  padding: 12px;
   border-radius: 8px;
   align-items: center;
   margin: 8px;
@@ -95,7 +81,7 @@ export const ListItem = styled.TouchableOpacity`
 // 头部组件
 export const Header = styled.View`
   background-color: ${() => useTheme().colors.primary};
-  padding: 20px;
+  padding: 25px;
   border-radius: 12px;
   margin-bottom: 16px;
 `;
